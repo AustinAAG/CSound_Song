@@ -1,0 +1,3693 @@
+<blueData version='2.8.1'>
+  <projectProperties>
+    <title></title>
+    <author></author>
+    <notes></notes>
+    <sampleRate>44100</sampleRate>
+    <ksmps>1</ksmps>
+    <channels>2</channels>
+    <useZeroDbFS>false</useZeroDbFS>
+    <zeroDbFS>1</zeroDbFS>
+    <diskSampleRate>44100</diskSampleRate>
+    <diskKsmps>1</diskKsmps>
+    <diskChannels>2</diskChannels>
+    <diskUseZeroDbFS>false</diskUseZeroDbFS>
+    <diskZeroDbFS>1</diskZeroDbFS>
+    <useAudioOut>true</useAudioOut>
+    <useAudioIn>false</useAudioIn>
+    <useMidiIn>false</useMidiIn>
+    <useMidiOut>false</useMidiOut>
+    <noteAmpsEnabled>true</noteAmpsEnabled>
+    <outOfRangeEnabled>true</outOfRangeEnabled>
+    <warningsEnabled>true</warningsEnabled>
+    <benchmarkEnabled>true</benchmarkEnabled>
+    <advancedSettings></advancedSettings>
+    <completeOverride>false</completeOverride>
+    <fileName></fileName>
+    <askOnRender>false</askOnRender>
+    <diskNoteAmpsEnabled>true</diskNoteAmpsEnabled>
+    <diskOutOfRangeEnabled>true</diskOutOfRangeEnabled>
+    <diskWarningsEnabled>true</diskWarningsEnabled>
+    <diskBenchmarkEnabled>true</diskBenchmarkEnabled>
+    <diskAdvancedSettings></diskAdvancedSettings>
+    <diskCompleteOverride>false</diskCompleteOverride>
+    <diskAlwaysRenderEntireProject>false</diskAlwaysRenderEntireProject>
+    <mediaFolder></mediaFolder>
+    <copyToMediaFileOnImport>true</copyToMediaFileOnImport>
+  </projectProperties>
+  <arrangement>
+    <instrumentAssignment arrangementId='1' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Rhodes Synth</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	
+	; Envelope for the amplitude of sound
+	irise = p16
+	idur = p3
+	idec = p17
+	iamp = p4
+	kenv linen iamp, irise, idur, idec
+	ifreq1 = cpspch(p5) ; frequency of desired note 1
+	ifreq2 = cpspch(p6) ; frequency of desired note 2
+	ifreq3 = cpspch(p7) ; frequency of desired note 3
+        ifreq4 = cpspch(p8)
+	kc1 = p9 ; Mod index 1
+	kc2 = p10 ; crossfade of two outputs
+	kvdepth = p11 ; vibrator depth
+	kvrate = p12 ; vibrator rate
+	
+	;inital waves
+	ifn1 = p13
+	ifn2 = p14
+	ifn3 = p15
+	ifn4 = 5 ; should be based of &quot;fwacblnk.aiff&quot; according to documentation
+	ivfn = 1 ; LFO used for vibrato
+	
+	; FM that replicated the sound of a Rhode synth
+	asig1 fmrhode 1, ifreq1, kc1, kc2, kvdepth, kvrate, ifn1, ifn2, ifn3, ifn4, ivfn ; Note 1 of Chord
+	asig2 fmrhode 1, ifreq2, kc1, kc2, kvdepth, kvrate, ifn1, ifn2, ifn3, ifn4, ivfn ; Note 2 of Chord
+	asig3 fmrhode 1, ifreq3, kc1, kc2, kvdepth, kvrate, ifn1, ifn2, ifn3, ifn4, ivfn ; Note 3 of Chord
+        asig4 fmrhode 1, ifreq4, kc1, kc2, kvdepth, kvrate, ifn1, ifn2, ifn3, ifn4, ivfn
+	asig = asig1+asig2+asig3+asig4
+	ares balance asig, asig1 ; Bring down the energy of the sound
+	
+	aL, aR pan2 ares*kenv, p18 ; Use p15 (0-1) to put this instrument in stereo space
+	
+	outs aL, aR
+	
+	gadelay = gadelay + (ares*kenv)
+	
+	gidletime = p19	; length of time betweeen playback
+	gidlefdbk = p20	; energy of playback
+	
+	irevamount = 0.1
+	irevtime = 2
+	
+	girevamount = irevamount
+	girevtime = irevtime
+	garevL = garevL+ares
+	garevR = garevR+ares
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='2' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Clap</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	kamp expon .5, p3, 0.001		; get exponentially quieter over length of note
+	ares randi p4, p6				; random series should be increasing
+	asig oscili ares, p5, 6		; random amplitude oscialltor with a high cps
+	
+	aL, aR pan2 asig*kamp, p7 	; Use p7 (0-1) to put this instrument in stereo space
+	outs aL, aR
+	
+	irevamount = 0.1
+	irevtime = 2
+	
+	girevamount = irevamount
+	girevtime = irevtime
+	garevL = aL
+	garevR = aR
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='3' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Snare</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	iamp = p4
+        ifreq = p5
+	aenv expon iamp, 0.03, 0.5	; decrease the amplitude to half quickly
+	a1 oscili aenv, p5, 7		; osciallte with decreasing amplitude at frequency 147
+	aamp expon iamp, 0.2, .1		; rapidle decrease amplituide
+	arand rand aamp				; randomly generates values over the range provided by aamp
+	asig = arand + a1
+	ares balance asig, arand 	; normalize the output so its not too loud
+	
+	aL, aR pan2 ares, p6	; Use p5 (0-1) to put this instrument in stereo space
+	
+	outs aL, aR
+	irevamount = 0.1
+	irevtime = 2
+	
+	girevamount = irevamount
+	girevtime = irevtime
+	garevL = aL
+	garevR = aR
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='4' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Kick</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	iamp = p4
+	k1  expon iamp, .2, 50		; decrese from p4 to about half its value in a short amount of time
+	aenv expon 1, p3, 0.01		; amplitude envelope decreasing volume exponentially
+	ares  poscil 1, k1, 7		; osciallator with frequency defined by k1
+	
+	aL, aR pan2 aenv*ares, p5	; Use p5 (0-1) to put this instrument in stereo space
+	
+	outs aL, aR
+	irevamount = 0.1
+	irevtime = 2
+	
+	girevamount = irevamount
+	girevtime = irevtime
+	garevL = aL
+	garevR = aR
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='5' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Gentle Wind</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	idur = p3
+	iamp = p4
+	ifreq = cpspch(p5)
+	
+	kamp linen iamp, idur/10, idur, idur/7	; amplitude envelope
+	arnd rand kamp									; randomize the amplitude points int the amplitude range
+	kbw expseg ifreq/10, idur, ifreq/400	; exponentially decrease the dsired frequency
+	asig butterbp arnd, ifreq, kbw			; apply bandpass filter
+	adel line p6, p3, p7
+	kfdbk oscil p8, p3*p9, 1
+	aflange flanger asig, adel, (kfdbk+1)/2
+	kpan lfo 1, p10, 1								; p6 defines how fast the sound moves between speakers
+	aL, aR pan2 asig*8, abs(kpan)				; cause sound to bounce back and forth between speakers
+	outs aL, aR										; had to add scaler to increase volume
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='6' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Sound Player</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>ioctave = p4
+itime = p5
+
+aL, aR diskin &quot;GlassGamers.wav&quot;, p4, p5
+outs aL, aR
+
+irevamount = 0.1
+irevtime = 3
+
+girevamount = irevamount
+girevtime = irevtime
+garevL = aL
+garevR = aR</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='7' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Sound Modulation</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>ifun = p4 ;grain envelope function table
+iolaps = p5 ; maximum number of overlaps
+imaxgrsize = p6 ;max grain size;
+ioffset = p7 ;start offset in seconds
+kamp = p8 ;amplitude scale
+ifreq = p9 ;frequency of grain duration
+ipitch = p11
+igrsize = p10 ; grain size in seconds
+
+aL, aR diskgrain &quot;GlassGamers.wav&quot;, kamp, ifreq, ipitch, igrsize, 1, ifun, iolaps, imaxgrsize, ioffset
+outs aL, aR
+
+irevamount = 0.1
+irevtime = 3
+
+girevamount = irevamount
+girevtime = irevtime
+garevL = aL
+garevR = aR</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='11' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Delay</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	imaxdel = 1001
+	adelay vdelay gadelay, gidletime, imaxdel
+	aL, aR pan2 adelay, 0.5
+	outs aL, aR
+	gadelay = adelay * gidlefdbk
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+    <instrumentAssignment arrangementId='99' isEnabled='true'>
+      <instrument type='blue.orchestra.GenericInstrument'>
+        <name>Reverb</name>
+        <comment></comment>
+        <globalOrc></globalOrc>
+        <globalSco></globalSco>
+        <instrumentText>	arevL reverb garevL, girevtime
+	arevR reverb garevR, girevtime
+	
+	outs arevL*girevamount, arevR*girevamount
+	
+	garevL = 0
+	garevR = 0
+</instrumentText>
+        <opcodeList/>
+      </instrument>
+    </instrumentAssignment>
+  </arrangement>
+  <mixer>
+    <enabled>false</enabled>
+    <extraRenderTime>0.0</extraRenderTime>
+    <channelList listName='Orchestra' list='channels'>
+      <channel>
+        <name>1</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770759' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>2</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770761' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>3</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770763' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>4</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770765' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>5</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770767' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>6</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770769' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>7</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='1068148279' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>11</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770771' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+      <channel>
+        <name>99</name>
+        <outChannel>Master</outChannel>
+        <level>0.0</level>
+        <muted>false</muted>
+        <solo>false</solo>
+        <effectsChain bin='pre'/>
+        <effectsChain bin='post'/>
+        <parameter uniqueId='705770773' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+          <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+            <linePoint x='0.0' y='0.0'/>
+          </line>
+        </parameter>
+      </channel>
+    </channelList>
+    <channelList listName='SubChannels' list='subChannels'/>
+    <channel>
+      <name>Master</name>
+      <outChannel>Master</outChannel>
+      <level>0.0</level>
+      <muted>false</muted>
+      <solo>false</solo>
+      <effectsChain bin='pre'/>
+      <effectsChain bin='post'/>
+      <parameter uniqueId='705770756' name='Volume' label='dB' min='-96.0' max='12.0' bdresolution='-1' automationEnabled='false' value='0.0'>
+        <line name='' version='2' max='12.0' min='-96.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+          <linePoint x='0.0' y='0.0'/>
+        </line>
+      </parameter>
+    </channel>
+  </mixer>
+  <tables>f1 0 8192 10 1 ; sine
+f2 0 4096 10 1 .5 .333 .25 .2 .166 .142 .125 .111 .1 ; sawtooth
+f3 0 4096 10 1 0 .333 0 .2 0 .142 0 .111 0 ; square
+f4 0 4096 10 1 0 .1111 0 .04 0 .0204 0 .0123 0 ; triangle
+f5 0 256 1 &quot;fwavblnk.aiff&quot; 0 0 0; audio file
+f6 0 16384 10 1
+f7 0 1024 10 1
+f8 0 8192 20 2 1 ;Hanning function
+</tables>
+  <soundObjectLibrary/>
+  <globalOrcSco>
+    <globalOrc>0dbfs = 1
+gadelay init 0
+gidletime init 1
+gidlefdbk init 0
+girevamount init 0
+girevtime init 0
+garevL init 0
+garevR init 0
+</globalOrc>
+    <globalSco>#define SRHODES #6 0 .01 3 1 1 1#
+#define TRHODES #6 0 .01 3 2 2 2#</globalSco>
+  </globalOrcSco>
+  <opcodeList/>
+  <liveData>
+    <commandLine>csound -Wdo devaudio -L stdin</commandLine>
+    <commandLineEnabled>false</commandLineEnabled>
+    <commandLineOverride>false</commandLineOverride>
+    <liveObjectBins columns='1' rows='8'>
+      <bin>
+        <null/>
+        <null/>
+        <null/>
+        <null/>
+        <null/>
+        <null/>
+        <null/>
+        <null/>
+      </bin>
+    </liveObjectBins>
+    <liveObjectSetList/>
+    <repeat>4</repeat>
+    <tempo>60</tempo>
+    <repeatEnabled>false</repeatEnabled>
+    <liveCodeText></liveCodeText>
+  </liveData>
+  <score>
+    <tempo>
+      <enabled>true</enabled>
+      <visible>true</visible>
+      <line name='' version='2' max='240.0' min='30.0' bdresolution='-1' color='-8355712' rightBound='false' endPointsLinked='false'>
+        <linePoint x='0.0' y='60.0'/>
+      </line>
+    </tempo>
+    <timeState>
+      <pixelSecond>50</pixelSecond>
+      <snapEnabled>true</snapEnabled>
+      <snapValue>0.25</snapValue>
+      <timeDisplay>0</timeDisplay>
+      <timeUnit>5</timeUnit>
+    </timeState>
+    <noteProcessorChain/>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Recording</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Recording' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>9.0</subjectiveDuration>
+          <startTime>18.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1 0</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>27.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 .9 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>28.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 .7 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>55.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1 3.1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>64.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>99.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>101.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1.2 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>103.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1.4 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>195.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 1 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>196.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 .9 7.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.75</subjectiveDuration>
+          <startTime>198.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3355444</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i6 0 1 .7 7.5</score>
+        </soundObject>
+      </soundLayer>
+      <soundLayer name='Modulation' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>5.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 1 1 0 .5 2 3 .5 0.9</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>3.0</subjectiveDuration>
+          <startTime>8.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 1 1 0 .7 2 2 .5 0.1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>5.0</subjectiveDuration>
+          <startTime>12.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 1 1 0 .9 2 1 1 1.1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>17.75</subjectiveDuration>
+          <startTime>77.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 2 1 0 .5 2 1 1 2</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>29.25</subjectiveDuration>
+          <startTime>132.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 .9 1 0 .5 2 1 1 2</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>19.5</subjectiveDuration>
+          <startTime>175.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i7 0 1 8 .9 1 0 .8 2 1 1 1.5</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Ambient</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Wind' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>30.5</subjectiveDuration>
+          <startTime>0.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>17.25</subjectiveDuration>
+          <startTime>30.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>22.0</subjectiveDuration>
+          <startTime>73.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>5.25</subjectiveDuration>
+          <startTime>99.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>5.75</subjectiveDuration>
+          <startTime>161.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>13.25</subjectiveDuration>
+          <startTime>191.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10027009</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i5 0 1 .3 8.00 .01 .02 .9 1 .5</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Synth</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Main Melody' muted='false' solo='false' heightIndex='1'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>31.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>32.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>33.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>35.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>36.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>37.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>39.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>41.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>41.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>43.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>45.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>45.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>48.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>49.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>50.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>52.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>53.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>54.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>56.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $TRHODES .2 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>58.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>58.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>60.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $TRHODES .2 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>62.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>62.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>65.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $TRHODES .2 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>66.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>67.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>69.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $TRHODES .2 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>70.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>71.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-26215</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $TRHODES .1 .1 .7 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>77.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .4 500 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>78.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>79.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>81.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .4 500 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>83.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>83.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>85.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .4 500 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>87.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>87.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>90.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .4 500 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>91.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>92.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-39322</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .4 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>167.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>168.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>169.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>171.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>172.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>173.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>175.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>177.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>177.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>179.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>181.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>181.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>184.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>185.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>186.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>1.5</subjectiveDuration>
+          <startTime>188.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.07 8.09 9.00 9.04 $SRHODES .2 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>189.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.04 8.07 8.11 9.02 $SRHODES .1 .1 .5 0 .25</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>190.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-65536</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .3 8.02 8.05 8.09 9.00 $SRHODES .1 .1 0 .5 .25</score>
+        </soundObject>
+      </soundLayer>
+      <soundLayer name='Melody 2  pt.1' muted='false' solo='false' heightIndex='1'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>105.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>107.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.08 9.03 9.07 10.00 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>109.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>111.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>113.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.08 9.03 9.08 9.10 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>115.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.05 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>117.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>119.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>121.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.08 9.03 9.07 10.00 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>123.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>125.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>127.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.08 9.03 9.08 9.10 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>129.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.05 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>131.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>133.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>135.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.08 9.03 9.07 10.00 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>137.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>139.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>141.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.08 9.03 9.08 9.10 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>143.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.05 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>145.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>147.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>149.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.08 9.03 9.07 10.00 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>151.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.07 $TRHODES .1 .1 0 .8 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>153.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>155.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .2 8.08 9.03 9.08 9.10 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>157.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.00 8.10 9.02 9.05 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>159.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 8.05 9.00 9.03 9.07 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+      </soundLayer>
+      <soundLayer name='Melody 2 pt. 2' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>107.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.03 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>109.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.02 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>111.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.10 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>115.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.08 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>121.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.03 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>123.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.02 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>125.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.10 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>129.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.08 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>135.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.03 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>137.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.02 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>139.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.10 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>143.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.08 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>149.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.03 0 0 0 $TRHODES .1 .1 1 .8 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>151.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 10.02 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>153.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.10 0 0 0 $TRHODES .1 .1 1 .8 .5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>2.0</subjectiveDuration>
+          <startTime>157.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-256</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i1 0 1 .1 9.08 0 0 0 $TRHODES .1 .1 .8 0 .5</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Drum Kit</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Kick' muted='false' solo='false' heightIndex='1'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>39.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>40.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>41.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>41.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>42.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>43.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>43.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>45.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>45.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>45.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>46.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>47.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>48.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>49.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>49.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>49.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>51.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>51.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>52.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>53.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>53.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>54.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>55.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>55.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>73.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>74.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>74.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>74.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>76.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>76.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>95.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>96.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>96.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>96.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>98.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>98.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>99.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>105.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>106.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>106.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>106.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>108.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>108.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>109.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>110.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>110.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>111.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>112.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>112.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>113.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>114.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>115.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>115.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>116.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>117.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>119.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>120.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>120.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>120.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>122.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>122.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>123.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>124.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>124.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>125.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>126.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>126.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>127.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>128.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>129.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>129.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>130.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>131.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>165.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>165.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>167.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>168.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>168.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>168.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>170.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>170.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>171.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>172.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>172.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>173.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>174.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>174.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>175.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>176.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>177.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>177.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>178.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>179.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>179.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>181.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>181.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>181.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>182.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5
+i4 1 1 100 0.5</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>183.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407668</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i4 0 1 100 0.5</score>
+        </soundObject>
+      </soundLayer>
+      <soundLayer name='Clap' muted='false' solo='false' heightIndex='1'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>48.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>48.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>49.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>50.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>50.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>51.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>51.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>52.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>52.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>53.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>54.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>54.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>55.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>55.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>73.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>73.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>74.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>75.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>75.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>76.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>76.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>95.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>95.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>96.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>97.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>97.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>98.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>98.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>165.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1
+i2 2 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>165.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>166.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1
+i2 2 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>167.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>167.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>168.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>169.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>169.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>170.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>170.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>171.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>171.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>172.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>173.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>173.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>174.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1
+i2 1 1 0.8 4500 5000 1</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.25</subjectiveDuration>
+          <startTime>174.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-10092442</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i2 0 1 0.8 4500 5000 1</score>
+        </soundObject>
+      </soundLayer>
+      <soundLayer name='Snare' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>49.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>51.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>53.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>55.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>74.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>76.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>96.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>98.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>106.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>108.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>110.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>112.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>115.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>117.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>120.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>122.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>124.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>126.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>129.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>131.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>166.25</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>168.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>170.5</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>172.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>0.5</subjectiveDuration>
+          <startTime>174.75</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-3407719</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i3 0 1 0 100</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Delay</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Synth Delay' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>180.0</subjectiveDuration>
+          <startTime>0.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i11 0 1</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+    <soundObject type='blue.soundObject.PolyObject'>
+      <subjectiveDuration>4.0</subjectiveDuration>
+      <startTime>0.0</startTime>
+      <name>Reverb</name>
+      <backgroundColor>-10066279</backgroundColor>
+      <timeBehavior>2</timeBehavior>
+      <repeatPoint>-1.0</repeatPoint>
+      <noteProcessorChain/>
+      <defaultHeightIndex>0</defaultHeightIndex>
+      <timeState>
+        <pixelSecond>64</pixelSecond>
+        <snapEnabled>false</snapEnabled>
+        <snapValue>1.0</snapValue>
+        <timeDisplay>0</timeDisplay>
+        <timeUnit>5</timeUnit>
+      </timeState>
+      <soundLayer name='Reverb' muted='false' solo='false' heightIndex='0'>
+        <noteProcessorChain/>
+        <soundObject type='blue.soundObject.GenericScore'>
+          <subjectiveDuration>180.0</subjectiveDuration>
+          <startTime>0.0</startTime>
+          <name>GenericScore</name>
+          <backgroundColor>-12566464</backgroundColor>
+          <timeBehavior>0</timeBehavior>
+          <repeatPoint>-1.0</repeatPoint>
+          <noteProcessorChain/>
+          <score>i99 0 1</score>
+        </soundObject>
+      </soundLayer>
+    </soundObject>
+  </score>
+  <scratchPadData>
+    <isWordWrapEnabled>true</isWordWrapEnabled>
+    <scratchText/>
+  </scratchPadData>
+  <noteProcessorChainMap/>
+  <renderStartTime>0.0</renderStartTime>
+  <renderEndTime>-1.0</renderEndTime>
+  <markersList/>
+  <loopRendering>true</loopRendering>
+  <midiInputProcessor>
+    <keyMapping>PCH</keyMapping>
+    <velMapping>MIDI</velMapping>
+    <pitchConstant/>
+    <ampConstant/>
+    <scale>
+      <scaleName>12TET</scaleName>
+      <baseFrequency>261.625565</baseFrequency>
+      <octave>2.0</octave>
+      <ratios>
+        <ratio>1.0</ratio>
+        <ratio>1.0594630943592953</ratio>
+        <ratio>1.122462048309373</ratio>
+        <ratio>1.1892071150027212</ratio>
+        <ratio>1.2599210498948734</ratio>
+        <ratio>1.3348398541700346</ratio>
+        <ratio>1.4142135623730954</ratio>
+        <ratio>1.498307076876682</ratio>
+        <ratio>1.5874010519682</ratio>
+        <ratio>1.6817928305074297</ratio>
+        <ratio>1.7817974362806794</ratio>
+        <ratio>1.887748625363388</ratio>
+      </ratios>
+    </scale>
+  </midiInputProcessor>
+  <pluginData>
+    <blueDataObject bdoType='blue.clojure.project.ClojureProjectData'/>
+  </pluginData>
+</blueData>
